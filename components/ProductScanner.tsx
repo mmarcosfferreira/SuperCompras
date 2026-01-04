@@ -75,14 +75,17 @@ export const ProductScanner: React.FC<Props> = ({ onScanComplete, onClose }) => 
           onScanComplete(result);
           stopCamera();
         } else {
-          alert("Não conseguimos identificar o produto. Tente aproximar mais da etiqueta de preço e nome.");
+          alert("Não conseguimos identificar o produto. Tente aproximar mais da etiqueta ou verificar a iluminação.");
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Capture error:", err);
-      alert("Erro ao processar a imagem. Verifique sua conexão ou a configuração da API.");
+      if (err.message && err.message.includes("API Key")) {
+        alert("ERRO DE CONFIGURAÇÃO: Chave da API não encontrada. Verifique se a variável VITE_API_KEY está configurada no Vercel.");
+      } else {
+        alert("Erro ao processar imagem. Tente novamente.");
+      }
     } finally {
-      // Crucial: Always reset processing state to prevent hanging
       setIsProcessing(false);
     }
   };
