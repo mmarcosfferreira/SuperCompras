@@ -1,0 +1,7 @@
+{
+  "name": "SuperApp Lista de Compras",
+  "description": "O aplicativo definitivo para organizar suas compras, com categorização inteligente via IA e calculadora integrada.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
