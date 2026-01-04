@@ -54,31 +54,36 @@ export const ProductScanner: React.FC<Props> = ({ onScanComplete, onClose }) => 
 
     setIsProcessing(true);
     
-    // Draw current video frame to canvas
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    try {
+      // Draw current video frame to canvas
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
       
-      // Convert to base64
-      const base64Image = canvas.toDataURL('image/jpeg', 0.8);
-      
-      // Send to AI
-      const result = await identifyProductFromImage(base64Image);
-      
-      if (result && result.name) {
-        onScanComplete(result);
-        stopCamera();
-      } else {
-        alert("Não consegui identificar o produto ou preço. Tente aproximar a etiqueta.");
-        setIsProcessing(false);
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Convert to base64
+        const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+        
+        // Send to AI
+        const result = await identifyProductFromImage(base64Image);
+        
+        if (result && result.name) {
+          onScanComplete(result);
+          stopCamera();
+        } else {
+          alert("Não conseguimos identificar o produto. Tente aproximar mais da etiqueta de preço e nome.");
+        }
       }
-    } else {
-        setIsProcessing(false);
+    } catch (err) {
+      console.error("Capture error:", err);
+      alert("Erro ao processar a imagem. Verifique sua conexão ou a configuração da API.");
+    } finally {
+      // Crucial: Always reset processing state to prevent hanging
+      setIsProcessing(false);
     }
   };
 
@@ -135,7 +140,7 @@ export const ProductScanner: React.FC<Props> = ({ onScanComplete, onClose }) => 
            <button 
              onClick={handleCapture}
              disabled={isProcessing}
-             className="w-20 h-20 bg-white rounded-full border-4 border-gray-300 flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+             className="w-20 h-20 bg-white rounded-full border-4 border-gray-300 flex items-center justify-center shadow-lg active:scale-95 transition-transform disabled:opacity-50 disabled:scale-100"
            >
              <div className="w-16 h-16 bg-white border-2 border-black rounded-full" />
            </button>

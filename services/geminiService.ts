@@ -1,11 +1,18 @@
 import { GoogleGenAI } from "@google/genai";
 import { CATEGORIES, CategoryType } from "../types";
 
-const apiKey = process.env.API_KEY;
 let ai: GoogleGenAI | null = null;
 
-if (apiKey) {
-  ai = new GoogleGenAI({ apiKey });
+try {
+  // Safe initialization to prevent browser crashes if process is undefined
+  // @ts-ignore
+  if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
+    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  } else {
+    console.warn("Gemini API Key is missing or process.env is unavailable.");
+  }
+} catch (error) {
+  console.error("Error initializing Gemini client:", error);
 }
 
 export const categorizeItemWithAI = async (itemName: string): Promise<CategoryType | null> => {
@@ -38,7 +45,10 @@ export const categorizeItemWithAI = async (itemName: string): Promise<CategoryTy
 };
 
 export const identifyProductFromImage = async (base64Image: string): Promise<{ name: string; price?: number } | null> => {
-  if (!ai) return null;
+  if (!ai) {
+    console.warn("AI service not initialized (Check API Key)");
+    return null;
+  }
 
   try {
     // Clean base64 string if it contains the header
